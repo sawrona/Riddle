@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateTracker() {
         const answerHistory = JSON.parse(localStorage.getItem(`answerHistory_${token}`)) || [];
         const score = JSON.parse(localStorage.getItem(`score_${token}`)) || 0;
-        answerHistoryElement.innerHTML = answerHistory.map(entry => `<li>${entry}</li>`).join('');
+        answerHistoryElement.innerHTML = answerHistory.map(entry => `<li>${entry.date}: ${entry.text}</li>`).join('');
         scoreElement.textContent = `Score: ${score}`;
     }
 
@@ -53,13 +53,15 @@ document.addEventListener('DOMContentLoaded', () => {
         let answerHistory = JSON.parse(localStorage.getItem(`answerHistory_${token}`)) || [];
         let score = JSON.parse(localStorage.getItem(`score_${token}`)) || 0;
 
+        const date = today.toLocaleDateString();
+
         if (userAnswer === riddle.answer) {
             resultElement.textContent = "Correct!";
-            answerHistory.push(`Correct: ${userAnswer}`);
+            answerHistory.push({ date, text: `Correct: ${userAnswer}` });
             score += 1;
         } else {
             resultElement.textContent = "Try again!";
-            answerHistory.push(`Incorrect: ${userAnswer}`);
+            answerHistory.push({ date, text: `Incorrect: ${userAnswer}` });
         }
 
         localStorage.setItem(`answerHistory_${token}`, JSON.stringify(answerHistory));
