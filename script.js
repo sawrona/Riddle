@@ -84,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tokenSection = document.getElementById('token-section');
     const caseSensitiveWarning = document.getElementById('case-sensitive-warning');
     const riddleSection = document.getElementById('riddle-section');
+    const congratulationsSection = document.getElementById('congratulations-section');
     const trackerSection = document.getElementById('tracker-section');
     const riddleElement = document.getElementById('riddle');
     const hintButton = document.getElementById('hint-button');
@@ -92,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const answerForm = document.getElementById('answer-form');
     const answerInput = document.getElementById('answer');
     const answerHistoryElement = document.getElementById('answer-history');
+    const answerHistoryBody = document.getElementById('answer-history-body');
     const scoreElement = document.getElementById('score');
 
     let token = '';
@@ -102,10 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (token) {
             tokenSection.style.display = 'none';
             caseSensitiveWarning.style.display = 'none';
-            riddleSection.style.display = 'block';
-            trackerSection.style.display = 'block';
-            loadRiddle();
-            updateTracker();
+            checkRiddleStatus();
         }
     });
 
@@ -117,16 +116,36 @@ document.addEventListener('DOMContentLoaded', () => {
         hintElement.textContent = `Hint: ${riddle.hint}`;
     }
 
-    hintButton.addEventListener('click', () => {
-        hintElement.style.display = 'block';
-    });
-
     function updateTracker() {
         const answerHistory = JSON.parse(localStorage.getItem(`answerHistory_${token}`)) || [];
         const score = JSON.parse(localStorage.getItem(`score_${token}`)) || 0;
         answerHistoryElement.innerHTML = answerHistory.map(entry => `<li>${entry.date}: ${entry.text}</li>`).join('');
+        answerHistoryBody.innerHTML = answerHistory.map(entry => `<tr><td>${entry.date}</td><td>${entry.text}</td></tr>`).join('');
         scoreElement.textContent = `Score: ${score}`;
     }
+
+    function checkRiddleStatus() {
+        const today = new Date().toLocaleDateString();
+        const answeredCorrectly = JSON.parse(localStorage.getItem(`answeredCorrectly_${token}_${today}`));
+        if (answeredCorrectly) {
+            showCongratulations();
+        } else {
+            riddleSection.style.display = 'block';
+            trackerSection.style.display = 'block';
+            loadRiddle();
+            updateTracker();
+        }
+    }
+
+    function showCongratulations() {
+        riddleSection.style.display = 'none';
+        congratulationsSection.style.display = 'block';
+        updateTracker();
+    }
+
+    hintButton.addEventListener('click', () => {
+        hintElement.style.display = 'block';
+    });
 
     answerForm.addEventListener('submit', (event) => {
         event.preventDefault();
@@ -145,7 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
             score += 1;
             localStorage.setItem(`answerHistory_${token}`, JSON.stringify(answerHistory));
             localStorage.setItem(`score_${token}`, JSON.stringify(score));
-            updateTracker();
+            localStorage.setItem(`answeredCorrectly_${token}_${date}`, true);
+            showCongratulations();
         } else {
             resultElement.textContent = "Try again!";
         }
