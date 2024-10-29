@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const riddleSection = document.getElementById('riddle-section');
     const trackerSection = document.getElementById('tracker-section');
     const riddleElement = document.getElementById('riddle');
+    const hintButton = document.getElementById('hint-button');
     const hintElement = document.getElementById('hint');
     const resultElement = document.getElementById('result');
     const answerForm = document.getElementById('answer-form');
@@ -116,6 +117,10 @@ document.addEventListener('DOMContentLoaded', () => {
         hintElement.textContent = `Hint: ${riddle.hint}`;
     }
 
+    hintButton.addEventListener('click', () => {
+        hintElement.style.display = 'block';
+    });
+
     function updateTracker() {
         const answerHistory = JSON.parse(localStorage.getItem(`answerHistory_${token}`)) || [];
         const score = JSON.parse(localStorage.getItem(`score_${token}`)) || 0;
@@ -138,14 +143,13 @@ document.addEventListener('DOMContentLoaded', () => {
             resultElement.textContent = "Correct!";
             answerHistory.push({ date, text: `Correct: ${userAnswer}` });
             score += 1;
+            localStorage.setItem(`answerHistory_${token}`, JSON.stringify(answerHistory));
+            localStorage.setItem(`score_${token}`, JSON.stringify(score));
+            updateTracker();
         } else {
             resultElement.textContent = "Try again!";
-            answerHistory.push({ date, text: `Incorrect: ${userAnswer}` });
         }
 
-        localStorage.setItem(`answerHistory_${token}`, JSON.stringify(answerHistory));
-        localStorage.setItem(`score_${token}`, JSON.stringify(score));
-        updateTracker();
         answerInput.value = '';
     });
 });
